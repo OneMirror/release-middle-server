@@ -1,6 +1,3 @@
-# OneMirror.net
-- A mirror powered by technology
-
 # 中间源服务器
 OneMirror 中间源服务器，用于存储构建(Release)
 

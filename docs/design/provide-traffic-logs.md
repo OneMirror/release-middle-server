@@ -1,5 +1,5 @@
 ### 仅提供经过匿名处理的流量信息
-```json
+```
 [$time,$remote_addr,$request_path,$user_agent,$range_start,$range_end]
 ```
 
