@@ -7,14 +7,15 @@ import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.LinkedHashMap
 
-object MiddleProperties {
-    private val properties:Map<String, Property> = run {
+object OneMirrorProperties {
+    private const val APP_NAME = "middle"
+    private val properties = run {
         val properties = LinkedHashMap<String, Property>()
-        properties.putAll(MiddleProperties::class.java.getResourceAsStream("default.properties")!!.use {
+        properties.putAll(OneMirrorProperties::class.java.getResourceAsStream("default.properties")!!.use {
             Properties().apply{ load(InputStreamReader(it, StandardCharsets.UTF_8)) }
         }.map { it.key.toString().lowercase() to Property(it.value.toString(), "default") })
 
-        val propertiesFile = Paths.get("middle.properties")
+        val propertiesFile = Paths.get("$APP_NAME.properties")
         if(Files.exists(propertiesFile)){
             properties.putAll(
                 Files.newBufferedReader(propertiesFile).use {
@@ -27,9 +28,9 @@ object MiddleProperties {
             System.getProperties().map {
                 it.key.toString().lowercase() to it.value
             }.filter {
-                it.first.startsWith("middle.")
+                it.first.startsWith("$APP_NAME.")
             }.map {
-                it.first.substring("middle.".length) to Property(it.second.toString(), "system")
+                it.first.substring("$APP_NAME.".length) to Property(it.second.toString(), "system")
             }
         )
 
@@ -37,21 +38,18 @@ object MiddleProperties {
             System.getenv().map {
                 it.key.lowercase() to it.value
             }.filter {
-                it.first.startsWith("middle_")
+                it.first.startsWith("${APP_NAME}_")
             }.map {
-                it.first.substring("middle_".length) to Property(it.second.toString(), "env")
+                it.first.substring("${APP_NAME}_".length) to Property(it.second.toString(), "env")
             }
         )
-        Collections.unmodifiableMap(properties)
+        properties.toMap()
     }
-
     operator fun get(key:String) =
         requireNotNull(properties.get(key)){
             "No properties $key found"
         }.value
-
     operator fun invoke() = properties
-
     data class Property(
         val value:String,
         val source:String

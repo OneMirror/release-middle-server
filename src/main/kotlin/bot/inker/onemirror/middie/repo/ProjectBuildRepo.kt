@@ -11,7 +11,9 @@ import jakarta.persistence.criteria.Predicate
 object ProjectBuildRepo {
     fun getByArguments(
         project: ProjectEntity? = null,
+        projectName: String? = null,
         version: ProjectVersionEntity? = null,
+        versionName: String? = null,
         buildNumber: Int? = null,
         change: String? = null,
     ): ProjectBuildEntity? {
@@ -21,7 +23,12 @@ object ProjectBuildRepo {
                     val root = from(ProjectBuildEntity::class.java)
                     where(*ArrayList<Predicate>().apply {
                         project?.let { add(equal(root.get<ProjectEntity>("project"), it)) }
+                        projectName?.let { add(equal(root.get<ProjectEntity>("project").get<String>("name"), it)) }
                         version?.let { add(equal(root.get<ProjectVersionEntity>("version"), it)) }
+                        projectName?.let {
+                            add(equal(root.get<ProjectVersionEntity>("version").get<String>("name"),
+                                it))
+                        }
                         buildNumber?.let { add(equal(root.get<Int>("buildNumber"), it)) }
                         change?.let { add(equal(root.get<String>("change"), it)) }
                     }.toTypedArray())
@@ -58,6 +65,20 @@ object ProjectBuildRepo {
                 }
             }).resultList
         }
+    }
+
+    fun getNextBuildNumber():Int {
+        return session {
+            createQuery(criteriaBuilder.run {
+                createQuery(ProjectBuildEntity::class.java).apply {
+                    val root = from(ProjectBuildEntity::class.java)
+                    select(root.get("buildNumber"))
+                    orderBy(desc(root.get<Int>("buildNumber")))
+                }
+            }).apply {
+                maxResults = 1
+            }.singleResult
+        }.buildNumber + 1
     }
 
     fun sync(project: ProjectEntity,

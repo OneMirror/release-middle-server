@@ -41,10 +41,13 @@ object ProjectDownloadRepo {
         }
     }
 
-    private fun getByArguments(
+    fun getByArguments(
         project: ProjectEntity? = null,
+        projectName: String? = null,
         version: ProjectVersionEntity? = null,
+        versionName: String? = null,
         build: ProjectBuildEntity? = null,
+        buildNumber: Int? = null,
         name: String? = null,
         hash: String? = null,
         downloadUrl: String? = null,
@@ -55,8 +58,17 @@ object ProjectDownloadRepo {
                     val root = from(ProjectDownloadEntity::class.java)
                     where(*ArrayList<Predicate>().apply {
                         project?.let { add(equal(root.get<ProjectEntity>("project"), it)) }
+                        projectName?.let { add(equal(root.get<ProjectEntity>("project").get<String>("name"), it)) }
                         version?.let { add(equal(root.get<ProjectVersionEntity>("version"), it)) }
+                        projectName?.let {
+                            add(equal(root.get<ProjectVersionEntity>("version").get<String>("name"),
+                                it))
+                        }
                         build?.let { add(equal(root.get<ProjectBuildEntity>("build"), it)) }
+                        buildNumber?.let {
+                            add(equal(root.get<ProjectBuildEntity>("build").get<Int>("buildNumber"),
+                                it))
+                        }
                         name?.let { add(equal(root.get<String>("name"), it)) }
                         hash?.let { add(equal(root.get<String>("hash"), it)) }
                         downloadUrl?.let { add(equal(root.get<String>("download_url"), it)) }
@@ -70,7 +82,7 @@ object ProjectDownloadRepo {
              version: ProjectVersionEntity,
              build: ProjectBuildEntity,
              name: String,
-             hash:String,
+             hash:String?,
              createAction:(ProjectDownloadEntity)->Unit={}
     ):ProjectDownloadEntity {
         session {
@@ -86,19 +98,18 @@ object ProjectDownloadRepo {
                 download.version = version
                 download.build = build
                 download.name = name
-                download.hash = hash
+                if (hash != null) {
+                    download.hash = hash
+                }
                 download.status = SyncStatus.SUCCESS
                 createAction(download)
                 transaction { persist(download) }
             } else {
-                if (download.hash != hash) {
-                    logger.info("Sync download with different hash")
-                    logger.info("project: {}", project.name)
-                    logger.info("version: {}", version.name)
-                    logger.info("build: {}", build.buildNumber)
-                    logger.info("name: {}", name)
-                    logger.info("hash: {}", download.hash)
-                    logger.info("new hash: {}", hash)
+                if (hash != null && download.hash != hash) {
+                    logger.info(
+                        "Sync download with different hash(project={}, version={}. build={}, name={}, hash={}, newHash={})",
+                        project.name, version.name, build.buildNumber, name, download.hash, hash
+                    )
                 }
             }
             return download

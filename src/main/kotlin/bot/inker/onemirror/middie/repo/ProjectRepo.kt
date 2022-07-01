@@ -32,7 +32,7 @@ object ProjectRepo {
         }
     }
 
-    fun getAll():List<ProjectEntity> {
+    fun getAllProjects(): List<ProjectEntity> {
         session {
             return createQuery(
                 criteriaBuilder.createQuery(ProjectEntity::class.java).apply {

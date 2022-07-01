@@ -21,6 +21,7 @@ object ProjectVersionRepo {
 
     fun getByArguments(
         project: ProjectEntity? = null,
+        projectName: String? = null,
         name: String? = null,
     ): ProjectVersionEntity? {
         session {
@@ -29,6 +30,7 @@ object ProjectVersionRepo {
                     val root = from(ProjectVersionEntity::class.java)
                     where(*ArrayList<Predicate>().apply {
                         project?.let { add(equal(root.get<ProjectEntity>("project"), it)) }
+                        projectName?.let { add(equal(root.get<ProjectEntity>("project").get<String>("name"), it)) }
                         name?.let { add(equal(root.get<String>("name"), it)) }
                     }.toTypedArray())
                 }

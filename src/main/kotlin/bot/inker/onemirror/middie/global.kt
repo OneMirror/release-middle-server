@@ -19,7 +19,7 @@ val okclient = OkHttpClient.Builder()
         it.request().newBuilder()
             .header(
                 "user-agent",
-                MiddleProperties["user_agent"]
+                OneMirrorProperties["user_agent"]
             )
             .build()
     ) }
@@ -28,12 +28,12 @@ val okclient = OkHttpClient.Builder()
 val hibernate by lazy {
     val configuration = Configuration()
     configuration.setProperty(AvailableSettings.CONNECTION_PROVIDER, "org.hibernate.hikaricp.internal.HikariCPConnectionProvider")
-    configuration.setProperty(AvailableSettings.DRIVER, MiddleProperties["database_driver_class"])
-    configuration.setProperty(AvailableSettings.DIALECT, MiddleProperties["database_dialect_class"])
-    configuration.setProperty(AvailableSettings.URL, MiddleProperties["database_url"])
-    configuration.setProperty(AvailableSettings.USER, MiddleProperties["database_username"])
-    configuration.setProperty(AvailableSettings.PASS, MiddleProperties["database_password"])
-    configuration.setProperty(AvailableSettings.POOL_SIZE, MiddleProperties["database_pool_size"])
+    configuration.setProperty(AvailableSettings.DRIVER, OneMirrorProperties["database_driver_class"])
+    configuration.setProperty(AvailableSettings.DIALECT, OneMirrorProperties["database_dialect_class"])
+    configuration.setProperty(AvailableSettings.URL, OneMirrorProperties["database_url"])
+    configuration.setProperty(AvailableSettings.USER, OneMirrorProperties["database_username"])
+    configuration.setProperty(AvailableSettings.PASS, OneMirrorProperties["database_password"])
+    configuration.setProperty(AvailableSettings.POOL_SIZE, OneMirrorProperties["database_pool_size"])
     configuration.setProperty(AvailableSettings.HBM2DDL_AUTO, "update")
 
     configuration.addAnnotatedClass(ProjectEntity::class.java)
